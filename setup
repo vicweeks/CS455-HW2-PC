@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+MACHINE_FILTER=${1-"120-unix-lab"}
+
+test_home=Classes/Spring_18/CS455/HW1-PC/CS455-HW1-PC
+
+for i in `cat machine_list`
+do
+echo 'logging into '${i}
+gnome-terminal -- bash -c "ssh -t ${i} 'cd ${test_home};java cs455.overlay.node.MessagingNode richmond 4444;bash;'" &
+done
