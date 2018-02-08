@@ -1,19 +1,21 @@
 package cs455.scaling.threadpool;
 
+import cs455.scaling.tasks.*;
 import java.util.LinkedList;
 
 public class ThreadPoolManager {
     
     private int threadPoolSize;
     private FixedThreadPool threadPool;
-    private LinkedList taskQueue;
+    private LinkedList<Runnable> taskQueue;
+    private boolean debug;
     
     public ThreadPoolManager(int threadPoolSize) {
 	this.threadPoolSize = threadPoolSize;
-	this.threadPool = new FixedThreadPool(threadPoolSize);
-	this.taskQueue = new LinkedList();
+	this.taskQueue = new LinkedList<Runnable>();
+	this.threadPool = new FixedThreadPool(taskQueue, threadPoolSize);
     }
-
+    
     public static void main(String[] args) {
 
     //TODO: partial implementation
@@ -33,6 +35,17 @@ public class ThreadPoolManager {
 	
 	if (args.length == 2)
 	    debug = true;	
+
+	ThreadPoolManager tpm = new ThreadPoolManager(threadPoolSize);
+
+	for (int i=0; i<50; i++) {
+	    tpm.taskQueue.add(new TestTask(i));
+	}
+
+	System.out.println("Tasks have been added.");
+
+	while (tpm.taskQueue.size() != 0)
+	    tpm.threadPool.retrieveSpareWorker();
 	
     }
     

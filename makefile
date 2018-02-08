@@ -3,7 +3,8 @@
 PACKAGES = \
 	cs455/scaling/server \
 	cs455/scaling/client \
-	cs455/scaling/threadpool
+	cs455/scaling/threadpool \
+	cs455/scaling/tasks
 
 JC = javac
 JVM = java
