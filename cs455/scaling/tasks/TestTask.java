@@ -1,10 +1,14 @@
 package cs455.scaling.tasks;
 
+import java.util.LinkedList;
+
 public class TestTask implements Runnable {
 
+    private LinkedList<Runnable> taskQueue;
     private int queuePosition;
     
-    public TestTask(int queuePosition) {
+    public TestTask(LinkedList<Runnable> taskQueue, int queuePosition) {
+	this.taskQueue = taskQueue;
 	this.queuePosition = queuePosition;
     }
 

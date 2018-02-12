@@ -1,39 +1,43 @@
 package cs455.scaling.threadpool;
 
-import java.util.LinkedList;
-import java.util.ArrayList;
-
 public class WorkerThread extends Thread {
 
     private FixedThreadPool threadPool;
-    private LinkedList<Runnable> taskQueue;
+    private boolean done = true;
     private Runnable task;
+    private boolean debug;
     
-    public WorkerThread(FixedThreadPool threadPool, LinkedList<Runnable> taskQueue) {
+    public WorkerThread(FixedThreadPool threadPool, boolean debug) {
 	this.threadPool = threadPool;
-	this.taskQueue = taskQueue;
+	this.debug = debug;
     }
 
     public void run() {
 	while (!isInterrupted()) {
-	    //TODO
 	    try {
-		// taskQueue to pop the next task
-		synchronized(taskQueue) {
-		    taskQueue.wait();
-		    if (taskQueue.size() != 0) {
-			task = taskQueue.remove();
+		synchronized(this) {
+		    if (done) {
+			if (debug)
+			    System.out.println("Thread " + Thread.currentThread().getName()
+					       + " is waiting to be assigned a task.");
+			wait();
+		    }
+		    else {			
 			task.run();
-		    } else
-			return;
+			done = true;
+			threadPool.returnToPool(this);
+		    }
 		}
 	    } catch (InterruptedException ie) {
 		System.out.println(ie.getMessage());
 	    }
-	    // Execute task
-	    //task.run();
-	    // Task is completed, restart loop
 	}
+    }
+
+    public synchronized void assignTask(Runnable task) {
+	this.task = task;
+	done = false;
+	notify();
     }
     
 }
