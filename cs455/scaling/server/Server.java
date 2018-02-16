@@ -6,18 +6,18 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.ClosedChannelException;
+import java.nio.ByteBuffer;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.Set;
-import java.util.Iterator;
 
 public class Server {
 
+    private static boolean debug;
     private static ThreadPoolManager tpm;
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
-    //private static SelectionKey serverKey;
-    private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+    //private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
     
     public static void main(String[] args) {
 
@@ -31,7 +31,7 @@ public class Server {
 
 	int portNumber = Integer.parseInt(args[0]);
 	int threadPoolSize = Integer.parseInt(args[1]);
-	boolean debug = false;
+	debug = false;
 	
 	if (args.length == 3)
 	    debug = true;	
@@ -41,7 +41,6 @@ public class Server {
 	try {
 	    s.setupServerSocket(portNumber);
 	    serverSelector = Selector.open();
-	    //serverKey = ssChannel.register(serverSelector, SelectionKey.OP_ACCEPT);
 	    s.executeServerLoop();	    
 	} catch (IOException ioe) {
 	    System.out.println(ioe.getMessage());
@@ -50,6 +49,7 @@ public class Server {
     }
 
     private void setupServerSocket(int portNumber) throws IOException {
+	System.out.println("Setting up server...");
 	ssChannel = ServerSocketChannel.open();
 	ssChannel.socket().bind(new InetSocketAddress(portNumber));
 	ssChannel.configureBlocking(false);
@@ -65,25 +65,41 @@ public class Server {
 	    // Find read ready channels
 	    if (serverSelector.selectNow() > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
-		Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
-		while (keyIterator.hasNext()) {
-		    SelectionKey key = keyIterator.next();
-		    
+		for (SelectionKey key : selectedKeys) {		    
 		    if (key.isReadable()) {
 			//TODO
+			readTestMessage(key);
 			// Enqueue a task to read message from client
 		    }
+		    selectedKeys.remove(key);
 		}
-		keyIterator.remove();
+		
 	    }
 	}
     }
 
+    private void readTestMessage(SelectionKey key) throws IOException {
+	SocketChannel socketChannel = (SocketChannel) key.channel();
+	ByteBuffer buf = ByteBuffer.allocate(8000);
+	int bytesRead = socketChannel.read(buf);
+	String testMessage = "";
+	if (bytesRead != -1) {
+	    buf.flip();
+	    while(buf.hasRemaining()) {
+		testMessage += (char) buf.get();
+	    }
+	    System.out.println(testMessage);
+	    buf.clear();
+	}
+    }
+    
     private void registerIncomingKey(SocketChannel socketChannel) throws IOException {
+	if (debug)
+	    System.out.println("Registering new client...");
 	try {
 	    socketChannel.configureBlocking(false);
-	    SelectionKey key = socketChannel.register(serverSelector, clientInterestSet);
+	    SelectionKey key = socketChannel.register(serverSelector, SelectionKey.OP_READ);
 	} catch (ClosedChannelException cce) {
 	    System.out.println(cce.getMessage());
 	}
