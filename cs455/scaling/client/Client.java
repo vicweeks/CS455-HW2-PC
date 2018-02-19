@@ -1,10 +1,17 @@
 package cs455.scaling.client;
 
-public class Client {
+import cs455.scaling.tasks.ClientTask;
+import java.nio.channels.SocketChannel;
+import java.net.InetSocketAddress;
+import java.io.IOException;
 
+public class Client {
+    
+    private static SocketChannel socketChannel;
+    
     public static void main(String[] args) {
 
-	Client s = new Client();
+	Client c = new Client();
 	
 	if (args.length < 3) {
             System.err.println(
@@ -19,7 +26,26 @@ public class Client {
 	
 	if (args.length == 4)
 	    debug = true;
+
+	try {
+	    c.setUpChannel(serverHost, serverPort);
+	    ClientTask clientTask = new ClientTask(socketChannel, messageRate);
+	    clientTask.run();
+	} catch (IOException ioe) {
+	    System.out.println(ioe.getMessage());
+	} catch (InterruptedException ie) {
+	    System.out.println(ie.getMessage());
+	}
 	
+    }
+
+    private void setUpChannel(String serverHost, int serverPort)
+	throws IOException, InterruptedException{
+	System.out.println("Setting up client...");
+	socketChannel = SocketChannel.open();
+	socketChannel.connect(new InetSocketAddress(serverHost, serverPort));
+	while(!socketChannel.finishConnect())
+	    Thread.sleep(100);
     }
     
 }
