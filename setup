@@ -6,9 +6,9 @@ test_home=Classes/Spring_18/CS455/HW2-PC/CS455-HW2-PC
 
 for i in `cat machine_list`
 do
-    for value in {1..7}
+    for value in {1..2}
     do
 	echo 'logging into '${i}
-	gnome-terminal -- bash -c "ssh -t ${i} 'cd ${test_home};java cs455.scaling.client.Client richmond 4444 4;bash;'" &
+	gnome-terminal -- bash -c "ssh -t ${i} 'cd ${test_home};java cs455.scaling.client.Client richmond 4444 1 d;bash;'" &
     done
 done

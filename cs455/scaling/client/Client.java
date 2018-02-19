@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.io.IOException;
 
 public class Client {
-
+    
     private static SocketChannel socketChannel;
     
     public static void main(String[] args) {
@@ -29,8 +29,8 @@ public class Client {
 
 	try {
 	    c.setUpChannel(serverHost, serverPort);
-	    ClientTask clientTask = new ClientTask(socketChannel);
-	    clientTask.startTask();
+	    ClientTask clientTask = new ClientTask(socketChannel, messageRate);
+	    clientTask.run();
 	} catch (IOException ioe) {
 	    System.out.println(ioe.getMessage());
 	} catch (InterruptedException ie) {

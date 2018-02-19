@@ -16,10 +16,32 @@ public class ThreadPoolManager {
 	this.taskQueue = new LinkedList<Runnable>();
 	this.threadPool = new FixedThreadPool(threadPoolSize, debug);
     }
+
+    public void addTaskToQueue(Runnable task) {
+	taskQueue.add(task);       
+    }
+
+    public void assignTask() {
+	synchronized(taskQueue) {
+	    WorkerThread thread = threadPool.retrieveSpareWorker();
+	    Runnable task = taskQueue.pollFirst();
+	    if (task == null) {
+		if (debug)
+		    System.out.println("Task Queue is empty, waiting for tasks.");
+		    try {
+			taskQueue.wait();
+			task = taskQueue.removeFirst();
+		    } catch (InterruptedException ie) {
+			System.out.println(ie.getMessage());
+		}
+	    }
+	    thread.assignTask(task);
+	}
+    }
     
     public static void main(String[] args) {
 
-    //TODO: partial implementation
+    // partial implementation
     // Note: this component can be created and tested in isolation from the rest of the system
     // should allocate a given number of threads;
     // maintain a queue of pending tasks;

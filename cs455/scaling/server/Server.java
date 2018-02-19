@@ -1,6 +1,7 @@
 package cs455.scaling.server;
 
 import cs455.scaling.threadpool.ThreadPoolManager;
+import cs455.scaling.tasks.ServerTask;
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -67,10 +68,10 @@ public class Server {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 
 		for (SelectionKey key : selectedKeys) {		    
-		    if (key.isReadable()) {
-			//TODO
-			readTestMessage(key);
-			// Enqueue a task to read message from client
+		    if (key.isReadable()) {	  
+			// create and enqueue a task to read message from client
+			createTask(key);			
+			tpm.assignTask();
 		    }
 		    selectedKeys.remove(key);
 		}
@@ -79,19 +80,9 @@ public class Server {
 	}
     }
 
-    private void readTestMessage(SelectionKey key) throws IOException {
-	SocketChannel socketChannel = (SocketChannel) key.channel();
-	ByteBuffer buf = ByteBuffer.allocate(8000);
-	int bytesRead = socketChannel.read(buf);
-	String testMessage = "";
-	if (bytesRead != -1) {
-	    buf.flip();
-	    while(buf.hasRemaining()) {
-		testMessage += (char) buf.get();
-	    }
-	    System.out.println(testMessage);
-	    buf.clear();
-	}
+    private void createTask(SelectionKey key) throws IOException {
+	ServerTask task = new ServerTask(key);
+	tpm.addTaskToQueue(task);
     }
     
     private void registerIncomingKey(SocketChannel socketChannel) throws IOException {
