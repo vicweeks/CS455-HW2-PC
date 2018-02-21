@@ -2,6 +2,8 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
+import cs455.scaling.util.ServerLogger;
+import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -11,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.Set;
+import java.util.Timer;
 
 public class Server {
 
@@ -18,6 +21,8 @@ public class Server {
     private static ThreadPoolManager tpm;
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
+    private static ServerLogger serverLogger = new ServerLogger();
+    
     //private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
     
     public static void main(String[] args) {
@@ -38,6 +43,9 @@ public class Server {
 	    debug = true;	
 
 	tpm = new ThreadPoolManager(threadPoolSize, debug);
+
+	Timer timer = new Timer();
+	timer.schedule(serverLogger, 5000, 5000);
 	
 	try {
 	    s.setupServerSocket(portNumber);
@@ -74,8 +82,7 @@ public class Server {
 			tpm.assignTask();
 		    }
 		    selectedKeys.remove(key);
-		}
-		
+		}		
 	    }
 	}
     }
@@ -91,6 +98,8 @@ public class Server {
 	try {
 	    socketChannel.configureBlocking(false);
 	    SelectionKey key = socketChannel.register(serverSelector, SelectionKey.OP_READ);
+	    ThroughputLogger logger = serverLogger.addClient();	    
+	    key.attach(logger);
 	} catch (ClosedChannelException cce) {
 	    System.out.println(cce.getMessage());
 	}

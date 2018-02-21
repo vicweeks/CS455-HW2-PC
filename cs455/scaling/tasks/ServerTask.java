@@ -1,6 +1,7 @@
 package cs455.scaling.tasks;
 
 import cs455.scaling.util.HashGenerator;
+import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.ByteBuffer;
@@ -11,11 +12,13 @@ public class ServerTask implements Runnable {
     private final HashGenerator hashGen;
     private SocketChannel socketChannel;
     private ByteBuffer buf;
+    private ThroughputLogger logger;
     
     public ServerTask(SelectionKey key) {
 	hashGen = new HashGenerator();
 	socketChannel = (SocketChannel) key.channel();
 	buf = ByteBuffer.allocate(8000);
+	logger = (ThroughputLogger) key.attachment();
     }
 
     public void run() {
@@ -25,7 +28,7 @@ public class ServerTask implements Runnable {
 	    buf.flip();
 	    buf.get(message);
 	    String messageHash = getHash(message);
-	    System.out.println(messageHash);
+	    logger.processMessage();
 	    buf.clear();
 	    //replyWithHash(messageHash);
 	} catch (IOException ioe) {
