@@ -31,7 +31,6 @@ public class ServerTask implements Runnable {
 	    buf.flip();
 	    buf.get(message);
 	    String messageHash = getHash(message);
-	    logger.processMessage();
 	    buf.clear();
 	    replyWithHash(messageHash);
 	} catch (IOException ioe) {
@@ -51,6 +50,7 @@ public class ServerTask implements Runnable {
 	while(buf.hasRemaining())
 	    socketChannel.write(buf);
 
+	logger.processMessage();
 	serverLogger.processMessage();
     }
     

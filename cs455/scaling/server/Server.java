@@ -45,7 +45,9 @@ public class Server {
 	tpm = new ThreadPoolManager(threadPoolSize, debug);
 
 	Timer timer = new Timer();
-	timer.schedule(serverLogger, 5000, 5000);
+	int interval = 5000;
+	// logs stats to the console every interval
+	timer.schedule(serverLogger, interval, interval);
 	
 	try {
 	    s.setupServerSocket(portNumber);

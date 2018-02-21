@@ -28,14 +28,14 @@ public class ClientTask extends Thread {
 
     public void run() {
 	while(!isInterrupted()) {
-	    // test
 	    try {
 		sendMessage();
 		Thread.sleep(1000 / messageRate);
 	    } catch (IOException ioe) {
 		System.out.println(ioe.getMessage());
+		System.exit(0);
 	    } catch (InterruptedException ie) {
-		System.out.println(ie.getMessage());
+		System.out.println(ie.getMessage());	        
 	    }
 	}
     }

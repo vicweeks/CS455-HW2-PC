@@ -31,7 +31,9 @@ public class Client {
 	    debug = true;
 
 	Timer timer = new Timer();
-	timer.schedule(clientLogger, 5000, 5000);
+	int interval = 5000;
+	// logs stats to the consol every interval
+	timer.schedule(clientLogger, interval, interval);
 	
 	try {
 	    c.setUpChannel(serverHost, serverPort);
