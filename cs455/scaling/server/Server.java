@@ -88,7 +88,7 @@ public class Server {
     }
 
     private void createTask(SelectionKey key) throws IOException {
-	ServerTask task = new ServerTask(key);
+	ServerTask task = new ServerTask(key, serverLogger);
 	tpm.addTaskToQueue(task);
     }
     

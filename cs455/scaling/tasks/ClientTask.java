@@ -1,6 +1,7 @@
 package cs455.scaling.tasks;
 
 import cs455.scaling.util.HashGenerator;
+import cs455.scaling.util.ClientLogger;
 import java.nio.channels.SocketChannel;
 import java.nio.ByteBuffer;
 import java.io.IOException;
@@ -13,14 +14,16 @@ public class ClientTask extends Thread {
     private ByteBuffer buf;
     private int messageRate;
     private LinkedList<String> packetHashcodes;
+    private ClientLogger logger;
     private final HashGenerator hashGen;
     
-    public ClientTask(SocketChannel socketChannel, int messageRate) {
+    public ClientTask(SocketChannel socketChannel, int messageRate, ClientLogger logger) {
 	this.socketChannel = socketChannel;
 	buf = ByteBuffer.allocate(8000);
 	this.messageRate = messageRate;
 	packetHashcodes = new LinkedList<String>();
 	hashGen = new HashGenerator();
+	this.logger = logger;
     }
 
     public void run() {
@@ -53,5 +56,7 @@ public class ClientTask extends Thread {
 	
 	while(buf.hasRemaining())
 	    socketChannel.write(buf);
+
+	logger.addSent();
     }
 }

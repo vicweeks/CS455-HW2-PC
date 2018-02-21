@@ -11,10 +11,6 @@ public class ThroughputLogger {
     public synchronized void processMessage() {
 	messagesProcessed += 1;
     }
-
-    public synchronized int getTotalProcessed() {
-	return messagesProcessed;
-    }
     
     public synchronized int getThroughput() {
 	// get throughput for last 20 seconds and reset counter

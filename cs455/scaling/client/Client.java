@@ -1,13 +1,16 @@
 package cs455.scaling.client;
 
 import cs455.scaling.tasks.ClientTask;
+import cs455.scaling.util.ClientLogger;
 import java.nio.channels.SocketChannel;
 import java.net.InetSocketAddress;
 import java.io.IOException;
+import java.util.Timer;
 
 public class Client {
     
     private static SocketChannel socketChannel;
+    private static ClientLogger clientLogger = new ClientLogger();
     
     public static void main(String[] args) {
 
@@ -27,9 +30,12 @@ public class Client {
 	if (args.length == 4)
 	    debug = true;
 
+	Timer timer = new Timer();
+	timer.schedule(clientLogger, 5000, 5000);
+	
 	try {
 	    c.setUpChannel(serverHost, serverPort);
-	    ClientTask clientTask = new ClientTask(socketChannel, messageRate);
+	    ClientTask clientTask = new ClientTask(socketChannel, messageRate, clientLogger);
 	    clientTask.run();
 	} catch (IOException ioe) {
 	    System.out.println(ioe.getMessage());

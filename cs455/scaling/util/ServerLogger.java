@@ -9,10 +9,12 @@ public class ServerLogger extends TimerTask {
 
     private static ArrayList<ThroughputLogger> clientLoggers;
     private int activeClients;
+    private int serverThroughput;
     
     public ServerLogger() {
 	clientLoggers = new ArrayList<ThroughputLogger>();
 	activeClients = 0;
+	serverThroughput = 0;
     }
 
     public ThroughputLogger addClient() {
@@ -22,13 +24,19 @@ public class ServerLogger extends TimerTask {
 	return logger;
     }
 
+    public synchronized void processMessage() {
+	serverThroughput += 1;
+    }
+
+    private void reset() {
+	serverThroughput = 0;
+    }
+    
     public void run() {
 	if (activeClients != 0) {
-	    int serverThroughput = 0;
 	    int meanPerClient = 0;
 	    int stdDevPerClient = 0;
 	    for (ThroughputLogger logger : clientLoggers) {
-		serverThroughput += logger.getTotalProcessed();
 		meanPerClient += logger.getThroughput();
 	    }
 	    serverThroughput /= 20;
@@ -42,6 +50,8 @@ public class ServerLogger extends TimerTask {
 	    System.out.printf("Mean Per-client Throughput: %d messages/s, \n", meanPerClient);
 	    System.out.printf("Std. Dev. of Per-client Throughput: %d messages/s \n\n",
 			      stdDevPerClient);
+
+	    reset();
 	}
     }
 }
