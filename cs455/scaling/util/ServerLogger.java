@@ -39,7 +39,7 @@ public class ServerLogger extends TimerTask {
 	    for (ThroughputLogger logger : clientLoggers) {
 		meanPerClient += logger.getThroughput();
 	    }
-	    serverThroughput /= 20;
+	    serverThroughput /= 5;
 	    meanPerClient /= activeClients;
 	    LocalTime time = LocalTime.now();
 	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m:s");

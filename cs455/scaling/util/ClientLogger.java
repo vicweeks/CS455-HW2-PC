@@ -32,7 +32,7 @@ public class ClientLogger extends TimerTask {
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m:s");
 	String timestamp = "[" + time.format(formatter) + "]";
 	
-	System.out.printf(timestamp + "Total Sent Count: %d, \n", totalSent);
+	System.out.printf(timestamp + " Total Sent Count: %d, \n", totalSent);
 	System.out.printf("Total Received Count: %d \n\n", totalReceived);
 
 	reset();

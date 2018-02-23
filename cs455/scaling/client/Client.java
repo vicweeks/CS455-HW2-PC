@@ -30,14 +30,11 @@ public class Client {
 	if (args.length == 4)
 	    debug = true;
 
-	Timer timer = new Timer();
-	int interval = 5000;
-	// logs stats to the consol every interval
-	timer.schedule(clientLogger, interval, interval);
+	c.printStatus();
 	
 	try {
 	    c.setUpChannel(serverHost, serverPort);
-	    ClientTask clientTask = new ClientTask(socketChannel, messageRate, clientLogger);
+	    ClientTask clientTask = new ClientTask(socketChannel, messageRate, clientLogger, debug);
 	    clientTask.run();
 	} catch (IOException ioe) {
 	    System.out.println(ioe.getMessage());
@@ -47,10 +44,18 @@ public class Client {
 	
     }
 
+    private void printStatus() {
+	// logs stats to the console evry interval
+	Timer timer = new Timer();
+	int interval = 5000;
+	timer.schedule(clientLogger, interval, interval);
+    }
+    
     private void setUpChannel(String serverHost, int serverPort)
 	throws IOException, InterruptedException{
 	System.out.println("Setting up client...");
 	socketChannel = SocketChannel.open();
+	socketChannel.configureBlocking(false);
 	socketChannel.connect(new InetSocketAddress(serverHost, serverPort));
 	while(!socketChannel.finishConnect())
 	    Thread.sleep(100);

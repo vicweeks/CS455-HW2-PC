@@ -42,12 +42,9 @@ public class Server {
 	if (args.length == 3)
 	    debug = true;	
 
+	s.printStatus();
+	
 	tpm = new ThreadPoolManager(threadPoolSize, debug);
-
-	Timer timer = new Timer();
-	int interval = 5000;
-	// logs stats to the console every interval
-	timer.schedule(serverLogger, interval, interval);
 	
 	try {
 	    s.setupServerSocket(portNumber);
@@ -59,6 +56,13 @@ public class Server {
 			
     }
 
+    private void printStatus() {
+	// log stats to the console every interval
+	Timer timer = new Timer();
+	int interval = 5000;
+	timer.schedule(serverLogger, interval, interval);
+    }
+    
     private void setupServerSocket(int portNumber) throws IOException {
 	System.out.println("Setting up server...");
 	ssChannel = ServerSocketChannel.open();
@@ -74,7 +78,7 @@ public class Server {
 	    if (socketChannel != null)
 		registerIncomingKey(socketChannel);
 	    // Find read ready channels
-	    if (serverSelector.selectNow() > 0) {
+	    if (serverSelector.select(1000) > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 
 		for (SelectionKey key : selectedKeys) {		    
@@ -88,9 +92,9 @@ public class Server {
 	    }
 	}
     }
-
+    
     private void createTask(SelectionKey key) throws IOException {
-	ServerTask task = new ServerTask(key, serverLogger);
+	ServerTask task = new ServerTask(key, serverLogger, debug);
 	tpm.addTaskToQueue(task);
     }
     
