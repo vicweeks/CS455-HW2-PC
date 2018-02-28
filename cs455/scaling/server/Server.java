@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.Set;
 import java.util.Timer;
+import java.util.Iterator;
 
 public class Server {
 
@@ -22,9 +23,7 @@ public class Server {
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
     private static ServerLogger serverLogger = new ServerLogger();
-    
-    //private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
-    
+       
     public static void main(String[] args) {
 
 	Server s = new Server();
@@ -80,14 +79,16 @@ public class Server {
 	    // Find read ready channels
 	    if (serverSelector.select(1000) > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
+		Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
-		for (SelectionKey key : selectedKeys) {		    
+	        while(keyIterator.hasNext()) {	    
+		    SelectionKey key = keyIterator.next();
 		    if (key.isReadable()) {	  
 			// create and enqueue a task to read message from client
 			createTask(key);			
 			tpm.assignTask();
 		    }
-		    selectedKeys.remove(key);
+		    keyIterator.remove();
 		}		
 	    }
 	}

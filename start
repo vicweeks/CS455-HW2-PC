@@ -2,7 +2,7 @@
 
 CLASSES=Classes/Spring_18/CS455/HW2-PC/CS455-HW2-PC
 
-SCRIPT="cd $CLASSES;java -cp . cs455.scaling.client.Client richmond 4444 1"
+SCRIPT="cd $CLASSES;java -cp . cs455.scaling.client.Client richmond 4444 4"
 
 for ((j=1; j<=$1; j++))
 do

@@ -21,7 +21,7 @@ public class ClientTask extends Thread {
     public ClientTask(SocketChannel socketChannel, int messageRate,
 		      ClientLogger logger, boolean debug) {
 	this.socketChannel = socketChannel;
-	buf = ByteBuffer.allocate(8000);
+	buf = ByteBuffer.allocate(8*1024);
 	this.messageRate = messageRate;
 	packetHashcodes = new LinkedList<String>();
 	hashGen = new HashGenerator();
@@ -45,7 +45,7 @@ public class ClientTask extends Thread {
     }
     
     private byte[] generateRandomBytes() {
-	byte[] rBytes = new byte[8000];
+	byte[] rBytes = new byte[8*1024];
 	new Random().nextBytes(rBytes);
 	return rBytes;
     }
