@@ -17,14 +17,12 @@ public class WorkerThread extends Thread {
 	    try {
 		synchronized(this) {
 		    if (done) {
-			if (debug)
-			    System.out.println("Thread " + Thread.currentThread().getName()
-					       + " is waiting to be assigned a task.");
 			wait();
 		    }
 		    else {			
 			task.run();
 			done = true;
+			task = null;
 			threadPool.returnToPool(this);
 		    }
 		}

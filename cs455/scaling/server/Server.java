@@ -2,6 +2,8 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
+import cs455.scaling.util.ServerLogger;
+import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -11,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.Set;
+import java.util.Timer;
 
 public class Server {
 
@@ -18,6 +21,8 @@ public class Server {
     private static ThreadPoolManager tpm;
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
+    private static ServerLogger serverLogger = new ServerLogger();
+    
     //private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
     
     public static void main(String[] args) {
@@ -37,6 +42,8 @@ public class Server {
 	if (args.length == 3)
 	    debug = true;	
 
+	s.printStatus();
+	
 	tpm = new ThreadPoolManager(threadPoolSize, debug);
 	
 	try {
@@ -49,6 +56,13 @@ public class Server {
 			
     }
 
+    private void printStatus() {
+	// log stats to the console every interval
+	Timer timer = new Timer();
+	int interval = 5000;
+	timer.schedule(serverLogger, interval, interval);
+    }
+    
     private void setupServerSocket(int portNumber) throws IOException {
 	System.out.println("Setting up server...");
 	ssChannel = ServerSocketChannel.open();
@@ -64,7 +78,7 @@ public class Server {
 	    if (socketChannel != null)
 		registerIncomingKey(socketChannel);
 	    // Find read ready channels
-	    if (serverSelector.selectNow() > 0) {
+	    if (serverSelector.select(1000) > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 
 		for (SelectionKey key : selectedKeys) {		    
@@ -74,14 +88,13 @@ public class Server {
 			tpm.assignTask();
 		    }
 		    selectedKeys.remove(key);
-		}
-		
+		}		
 	    }
 	}
     }
-
+    
     private void createTask(SelectionKey key) throws IOException {
-	ServerTask task = new ServerTask(key);
+	ServerTask task = new ServerTask(key, serverLogger, debug);
 	tpm.addTaskToQueue(task);
     }
     
@@ -91,6 +104,8 @@ public class Server {
 	try {
 	    socketChannel.configureBlocking(false);
 	    SelectionKey key = socketChannel.register(serverSelector, SelectionKey.OP_READ);
+	    ThroughputLogger logger = serverLogger.addClient();	    
+	    key.attach(logger);
 	} catch (ClosedChannelException cce) {
 	    System.out.println(cce.getMessage());
 	}
