@@ -21,7 +21,7 @@ public class ServerTask implements Runnable {
     public ServerTask(SelectionKey key, ServerLogger serverLogger, boolean debug) {
 	hashGen = new HashGenerator();
 	socketChannel = (SocketChannel) key.channel();
-	buf = ByteBuffer.allocate(8000);
+	buf = ByteBuffer.allocate(8*1024);
 	logger = (ThroughputLogger) key.attachment();
 	this.serverLogger = serverLogger;
 	this.debug = debug;

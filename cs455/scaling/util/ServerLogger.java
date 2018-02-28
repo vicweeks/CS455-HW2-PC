@@ -55,7 +55,9 @@ public class ServerLogger extends TimerTask {
 	double mean = mean(clients);
 	for (Integer i : clients)
 	    sum += Math.pow((i - mean), 2);
-	return Math.sqrt(sum / (clients.size() - 1));
+	if (activeClients > 1)
+	    return Math.sqrt(sum / (clients.size() - 1));
+	return 0.0;
     }
     
     public void run() {

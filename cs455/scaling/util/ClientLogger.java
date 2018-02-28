@@ -14,15 +14,15 @@ public class ClientLogger extends TimerTask {
 	totalReceived = 0;
     }
 
-    public void addSent() {
+    public synchronized void addSent() {
 	totalSent += 1;
     }
 
-    public void addReceived() {
+    public synchronized void addReceived() {
 	totalReceived += 1;
     }
 
-    private void reset() {
+    private synchronized void reset() {
 	totalSent = 0;
 	totalReceived = 0;
     }
