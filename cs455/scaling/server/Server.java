@@ -89,9 +89,12 @@ public class Server {
 		    keyIterator.remove();    
 		    		    
 		    if (key.interestOps() == SelectionKey.OP_READ) {	  
-			// create and enqueue a task to read message from client
-			createTask(key);			
-			tpm.assignTask();
+			if (key.isReadable()) {
+			    // create and enqueue a task to read message from client
+			    key.interestOps(SelectionKey.OP_WRITE);
+			    createTask(key);			
+			    tpm.assignTask();
+			}
 		    }       	    
 		}		
 	    }

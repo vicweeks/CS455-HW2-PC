@@ -32,10 +32,10 @@ public class ServerLogger extends TimerTask {
 	serverThroughput = 0;
     }
 
-    private int sum (ArrayList<Integer> clients) {
+    private double sum (ArrayList<Double> clients) {
 	if (clients.size() > 0) {
-	    int sum = 0;
-	    for (Integer i : clients) {
+	    Double sum = 0.0;
+	    for (Double i : clients) {
 		sum += i;
 	    }
 	    return sum;
@@ -43,17 +43,17 @@ public class ServerLogger extends TimerTask {
 	return 0;
     }
     
-    private double mean(ArrayList<Integer> clients) {
-	int sum = sum(clients);
-	double mean = 0;
-	mean = sum / (clients.size() * 1.0);
+    private double mean(ArrayList<Double> clients) {
+	Double sum = sum(clients);
+	double mean = 0.0;
+	mean = sum / (clients.size());
 	return mean; 
     }
     
-    private double standardDev(ArrayList<Integer> clients) {
-	int sum = 0;
+    private double standardDev(ArrayList<Double> clients) {
+	double sum = 0.0;
 	double mean = mean(clients);
-	for (Integer i : clients)
+	for (Double i : clients)
 	    sum += Math.pow((i - mean), 2);
 	if (activeClients > 1)
 	    return Math.sqrt(sum / (clients.size() - 1));
@@ -62,11 +62,11 @@ public class ServerLogger extends TimerTask {
     
     public void run() {
 	if (activeClients != 0) {
-	    ArrayList<Integer> meanPerClient = new ArrayList<Integer>();
+	    ArrayList<Double> meanPerClient = new ArrayList<Double>();
 	    for (ThroughputLogger logger : clientLoggers) {
 		meanPerClient.add(logger.getThroughput());
 	    }
-	    int localServerThroughput = serverThroughput/5;
+	    Double localServerThroughput = serverThroughput/5.0;
 	    reset();
 	    double mean = mean(meanPerClient);
 	    double std = standardDev(meanPerClient);
@@ -74,7 +74,7 @@ public class ServerLogger extends TimerTask {
 	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m:s");
 	    String timestamp = "[" + time.format(formatter) + "]";
 	
-	    System.out.printf(timestamp + " Server Throughput: %d messages/s, \n", localServerThroughput);
+	    System.out.printf(timestamp + " Server Throughput: %f messages/s, \n", localServerThroughput);
 	    System.out.printf("Active Client Connections: %d, \n", activeClients);
 	    System.out.printf("Mean Per-client Throughput: %f messages/s, \n", mean);
 	    System.out.printf("Std. Dev. of Per-client Throughput: %f messages/s \n\n", std);

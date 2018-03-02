@@ -10,7 +10,7 @@ public class HashGenerator {
         
     }
 
-    public String SHA1FromBytes(byte[] data) {
+    public byte[] SHA1FromBytes(byte[] data) {
 	MessageDigest digest = null;
 	try {
 	    digest = MessageDigest.getInstance("SHA1");
@@ -18,8 +18,9 @@ public class HashGenerator {
 	    System.out.println(nsae.getMessage());
 	}
 	byte[] hash = digest.digest(data);
-	BigInteger hashInt = new BigInteger(1, hash);
-	return hashInt.toString(16);
+	return hash;
+	//BigInteger hashInt = new BigInteger(1, hash);
+	//return hashInt.toString(16);
     }
     
 }

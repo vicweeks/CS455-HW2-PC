@@ -36,6 +36,14 @@ public class ClientTask extends Thread {
     private void receiveMessage() {
         try {
 	    int bytesRead = socketChannel.read(buf);
+	    //int bytesRead = 0;
+
+	    /*
+	    while(buf.hasRemaining() && bytesRead != -1)
+		bytesRead = socketChannel.read(buf);
+
+	    System.out.println(buf.toString());
+	    */
 	    if (bytesRead <= 0) { // nothing has been read
 		if (debug)
 		    //System.out.println("Nothing was read. " + bytesRead);
@@ -47,6 +55,7 @@ public class ClientTask extends Thread {
 		checkHash(message);
 		buf.clear();
 	    }
+	    
 	} catch (IOException ioe) {
 	    System.out.println(ioe.getMessage());
 	    System.exit(0);
@@ -55,7 +64,8 @@ public class ClientTask extends Thread {
 
     private void checkHash(byte[] message) {
 	String messageHash = new String(message);
-	//System.out.println("Received Hash: " + messageHash);
+	if (debug)
+	    System.out.println("Received Hash: " + messageHash);
         hashCache.checkHash(messageHash);
     }
 }
