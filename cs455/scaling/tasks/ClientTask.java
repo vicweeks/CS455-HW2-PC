@@ -16,14 +16,19 @@ public class ClientTask extends Thread {
     
     public ClientTask(SocketChannel socketChannel, HashCache hashCache, boolean debug) {
 	this.socketChannel = socketChannel;
-	buf = ByteBuffer.allocate(8*1024);
+	buf = ByteBuffer.allocate(40);
         this.hashCache = hashCache;
 	this.debug = debug;
     }
 
     public void run() {
-	while(!isInterrupted()) {
-	   receiveMessage();		
+	try {
+	    Thread.sleep(1000);
+	    while(!isInterrupted()) {
+		receiveMessage();		
+	    }
+	} catch (InterruptedException ie) {
+	    System.out.println(ie.getMessage());
 	}
     }
 
@@ -50,6 +55,7 @@ public class ClientTask extends Thread {
 
     private void checkHash(byte[] message) {
 	String messageHash = new String(message);
+	//System.out.println("Received Hash: " + messageHash);
         hashCache.checkHash(messageHash);
     }
 }

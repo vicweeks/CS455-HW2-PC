@@ -32,7 +32,8 @@ public class ClientSendTask extends Thread {
 	while(!isInterrupted()) {
 	    try {
 		sendMessage();
-		Thread.sleep(1000 / messageRate);		
+		Thread.sleep(1000 / messageRate);
+		//Thread.sleep(2000);
 	    } catch (IOException ioe) {
 		System.out.println(ioe.getMessage());
 		System.exit(0);
@@ -48,15 +49,49 @@ public class ClientSendTask extends Thread {
 	return rBytes;
     }
 
+    private byte[] genTestBytes() {
+	byte[] testBytes = new byte[16];
+	new Random().nextBytes(testBytes);
+	//System.out.println("Sending Bytes: " + byteArrayToString(testBytes));
+	return testBytes;
+    }
+
+    private String byteArrayToString(byte[] in) {
+	char out[] = new char[in.length * 2];
+	for (int i = 0; i < in.length; i++) {
+	    out[i * 2] = "0123456789ABCDEF".charAt((in[i] >> 4) & 15);
+	    out[i * 2 + 1] = "0123456789ABCDEF".charAt(in[i] & 15);
+	}
+	return new String(out);
+    }
+    
     private void sendMessage() throws IOException {
 	if(debug)
 	    System.out.println("Sending message");
-	byte[] message = generateRandomBytes();
-	String messageHash = hashGen.SHA1FromBytes(message);
-        hashCache.addHash(messageHash);
+	//byte[] message = generateRandomBytes();
 
-	ByteBuffer buffer = ByteBuffer.wrap(message);
-	socketChannel.write(buffer);
+	byte[] message = genTestBytes();
+	String messageHash = hashGen.SHA1FromBytes(message);
+	
+	//System.out.println("Sent Message: " + message);
+	//System.out.println("Sent Hash: " + messageHash);
+
+	hashCache.addHash(messageHash);
+
+	ByteBuffer buffer = ByteBuffer.allocate(16);
+	buffer.clear();
+	buffer.put(message);
+	buffer.flip();
+
+	while(buffer.hasRemaining()) {
+	    socketChannel.write(buffer);
+	}
+
+
+	//ByteBuffer buffer = ByteBuffer.wrap(message);
+
+	//System.out.println(buffer.toString());
+	//socketChannel.write(buffer);
 
 	logger.addSent();
     }

@@ -2,6 +2,7 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
+import cs455.scaling.util.HashGenerator;
 import cs455.scaling.util.ServerLogger;
 import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.Selector;
@@ -23,6 +24,7 @@ public class Server {
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
     private static ServerLogger serverLogger = new ServerLogger();
+    private HashGenerator hashGen = new HashGenerator();
        
     public static void main(String[] args) {
 
@@ -76,26 +78,28 @@ public class Server {
 	    // Register new sockets
 	    if (socketChannel != null)
 		registerIncomingKey(socketChannel);
-	    // Find read ready channels
+	    // Find read ready channels	    
+		
 	    if (serverSelector.select(1000) > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 		Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-
+		
 	        while(keyIterator.hasNext()) {	    
 		    SelectionKey key = keyIterator.next();
-		    if (key.isReadable()) {	  
+		    keyIterator.remove();    
+		    		    
+		    if (key.interestOps() == SelectionKey.OP_READ) {	  
 			// create and enqueue a task to read message from client
 			createTask(key);			
 			tpm.assignTask();
-		    }
-		    keyIterator.remove();
+		    }       	    
 		}		
 	    }
 	}
     }
     
     private void createTask(SelectionKey key) throws IOException {
-	ServerTask task = new ServerTask(key, serverLogger, debug);
+	ServerTask task = new ServerTask(key, serverLogger, hashGen, debug);
 	tpm.addTaskToQueue(task);
     }
     

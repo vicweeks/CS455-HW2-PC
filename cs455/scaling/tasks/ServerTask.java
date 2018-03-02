@@ -11,17 +11,18 @@ import java.io.IOException;
 public class ServerTask implements Runnable {
 
     private SelectionKey key;
-    private final HashGenerator hashGen;
+    private HashGenerator hashGen;
     private SocketChannel socketChannel;
     private ByteBuffer buf;
     private ThroughputLogger logger;
     private ServerLogger serverLogger;
     private boolean debug;
     
-    public ServerTask(SelectionKey key, ServerLogger serverLogger, boolean debug) {
-	hashGen = new HashGenerator();
+    public ServerTask(SelectionKey key, ServerLogger serverLogger, HashGenerator hashGen,
+		      boolean debug) {
+	this.hashGen = hashGen;
 	socketChannel = (SocketChannel) key.channel();
-	buf = ByteBuffer.allocate(8*1024);
+	buf = ByteBuffer.allocate(16);
 	logger = (ThroughputLogger) key.attachment();
 	this.serverLogger = serverLogger;
 	this.debug = debug;
@@ -29,9 +30,27 @@ public class ServerTask implements Runnable {
 	key.interestOps(SelectionKey.OP_WRITE);
     }
 
+    private String byteArrayToString(byte[] in) {
+	char out[] = new char[in.length * 2];
+	for (int i = 0; i < in.length; i++) {
+	    out[i * 2] = "0123456789ABCDEF".charAt((in[i] >> 4) & 15);
+	    out[i * 2 + 1] = "0123456789ABCDEF".charAt(in[i] & 15);
+	}
+	return new String(out);
+    }
+    
     public void run() {
 	try {	    
-	    int bytesRead = socketChannel.read(buf);
+	    int bytesRead = 0;
+	    
+	    //System.out.println(buf.toString());
+	    
+	    while(buf.hasRemaining() && bytesRead != -1) {
+		bytesRead = socketChannel.read(buf);
+	    }
+
+	    //System.out.println(buf.toString());
+	    
 	    if (bytesRead == -1) {
 		System.out.println("Connection terminated by the client.");
 		return;
@@ -42,6 +61,11 @@ public class ServerTask implements Runnable {
 	    buf.get(message);
 	    
 	    String messageHash = getHash(message);
+
+	    //System.out.println("Received Bytes: " + byteArrayToString(message));
+	    //System.out.println("Received Message: " + message);
+	    //System.out.println("Message Hash: " + messageHash);
+	    
 	    buf.clear();	    
 	    replyWithHash(messageHash);
 	} catch (IOException ioe) {
@@ -55,7 +79,6 @@ public class ServerTask implements Runnable {
 
     private void replyWithHash(String messageHash) throws IOException {
 	byte[] replyMessage = messageHash.getBytes();
-	
 	ByteBuffer buffer = ByteBuffer.wrap(replyMessage);        
 	socketChannel.write(buffer);
 	
