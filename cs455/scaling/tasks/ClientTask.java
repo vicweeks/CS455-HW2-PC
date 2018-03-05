@@ -1,5 +1,6 @@
 package cs455.scaling.tasks;
 
+import cs455.scaling.util.HashGenerator;
 import cs455.scaling.util.HashCache;
 import java.nio.channels.SocketChannel;
 import java.nio.ByteBuffer;
@@ -12,11 +13,12 @@ public class ClientTask extends Thread {
     private SocketChannel socketChannel;
     private ByteBuffer buf;
     private HashCache hashCache;
+    private final HashGenerator hashGen = new HashGenerator();
     private boolean debug;
     
     public ClientTask(SocketChannel socketChannel, HashCache hashCache, boolean debug) {
 	this.socketChannel = socketChannel;
-	buf = ByteBuffer.allocate(40);
+	buf = ByteBuffer.allocate(20);
         this.hashCache = hashCache;
 	this.debug = debug;
     }
@@ -32,21 +34,19 @@ public class ClientTask extends Thread {
 	}
     }
 
-    // TODO: look for errors here
     private void receiveMessage() {
         try {
-	    int bytesRead = socketChannel.read(buf);
-	    //int bytesRead = 0;
+	    int bytesRead = 0;
 
-	    /*
 	    while(buf.hasRemaining() && bytesRead != -1)
 		bytesRead = socketChannel.read(buf);
 
-	    System.out.println(buf.toString());
-	    */
+	    //System.out.println(buf.toString());
+	    
 	    if (bytesRead <= 0) { // nothing has been read
-		if (debug)
-		    //System.out.println("Nothing was read. " + bytesRead);
+		if (debug) {
+		    System.out.println("Nothing was read. " + bytesRead);
+		}
 		return;
 	    } else {
 		byte[] message = new byte[bytesRead];
@@ -62,10 +62,11 @@ public class ClientTask extends Thread {
 	}
     }
 
-    private void checkHash(byte[] message) {
-	String messageHash = new String(message);
-	if (debug)
+    private void checkHash(byte[] hashBytes) {
+	String messageHash = hashGen.convertToString(hashBytes);
+	if (debug) {
 	    System.out.println("Received Hash: " + messageHash);
+	}
         hashCache.checkHash(messageHash);
     }
 }

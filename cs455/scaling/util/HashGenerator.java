@@ -17,10 +17,12 @@ public class HashGenerator {
 	} catch (NoSuchAlgorithmException nsae) {
 	    System.out.println(nsae.getMessage());
 	}
-	byte[] hash = digest.digest(data);
-	return hash;
-	//BigInteger hashInt = new BigInteger(1, hash);
-	//return hashInt.toString(16);
+	return digest.digest(data);	
+    }
+
+    public String convertToString(byte[] hashBytes) {
+	BigInteger hashInt = new BigInteger(1, hashBytes);
+	return hashInt.toString(16);
     }
     
 }

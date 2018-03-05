@@ -56,14 +56,18 @@ public class ClientSendTask extends Thread {
     
     private void sendMessage() throws IOException {
 	byte[] message = generateRandomBytes();
+	//String messageString = "hello world";
+	//byte[] message = messageString.getBytes();
+       
+	//byte[] message = genTestBytes(2);
+        byte[] hashBytes = hashGen.SHA1FromBytes(message);
+	String messageHash = hashGen.convertToString(hashBytes);
 
-	//byte[] message = genTestBytes(4);
-	String messageHash = hashGen.SHA1FromBytes(message);
-	
-	//System.out.println("Sent Message: " + message);
-	if(debug)
+	//System.out.println("Sent Message: " + new String(message));
+	if(debug) {
 	    System.out.println("Sent Hash: " + messageHash);
-
+	}
+	
 	hashCache.addHash(messageHash);
 
 	ByteBuffer buffer = ByteBuffer.allocate(8*1024);
@@ -74,12 +78,6 @@ public class ClientSendTask extends Thread {
 	while(buffer.hasRemaining()) {
 	    socketChannel.write(buffer);
 	}
-
-
-	//ByteBuffer buffer = ByteBuffer.wrap(message);
-
-	//System.out.println(buffer.toString());
-	//socketChannel.write(buffer);
 
 	logger.addSent();
     }

@@ -4,7 +4,8 @@ import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
 import cs455.scaling.util.HashGenerator;
 import cs455.scaling.util.ServerLogger;
-import cs455.scaling.util.ThroughputLogger;
+//import cs455.scaling.util.ThroughputLogger;
+import cs455.scaling.util.ClientAttachment;
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -112,8 +113,9 @@ public class Server {
 	try {
 	    socketChannel.configureBlocking(false);
 	    SelectionKey key = socketChannel.register(serverSelector, SelectionKey.OP_READ);
-	    ThroughputLogger logger = serverLogger.addClient();	    
-	    key.attach(logger);
+	    ClientAttachment attachment = new ClientAttachment(serverLogger);
+	    //ThroughputLogger logger = serverLogger.addClient();	    
+	    key.attach(attachment);
 	} catch (ClosedChannelException cce) {
 	    System.out.println(cce.getMessage());
 	}

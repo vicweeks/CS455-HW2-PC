@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+CLASSES=Classes/Spring_18/CS455/HW2-PC/CS455-HW2-PC
+
+SCRIPT="cd $CLASSES;java -cp . cs455.scaling.client.Client '$2' 4444 4"
+
+for ((j=1; j<=$1; j++))
+do
+    COMMAND='gnome-terminal'
+    for i in `cat machine_list_fish`
+    do
+	echo 'logging into '$i
+	OPTION='--tab -e "ssh -t '$i' '$SCRIPT'"'
+	COMMAND+=" $OPTION"
+    done
+    eval $COMMAND &
+done
