@@ -28,30 +28,56 @@ public class ServerLogger extends TimerTask {
 	serverThroughput += 1;
     }
 
-    private void reset() {
+    private synchronized void reset() {
 	serverThroughput = 0;
+    }
+
+    private double sum (ArrayList<Double> clients) {
+	if (clients.size() > 0) {
+	    Double sum = 0.0;
+	    for (Double i : clients) {
+		sum += i;
+	    }
+	    return sum;
+	}
+	return 0;
+    }
+    
+    private double mean(ArrayList<Double> clients) {
+	Double sum = sum(clients);
+	double mean = 0.0;
+	mean = sum / (clients.size());
+	return mean; 
+    }
+    
+    private double standardDev(ArrayList<Double> clients) {
+	double sum = 0.0;
+	double mean = mean(clients);
+	for (Double i : clients)
+	    sum += Math.pow((i - mean), 2);
+	if (activeClients > 1)
+	    return Math.sqrt(sum / (clients.size() - 1));
+	return 0.0;
     }
     
     public void run() {
 	if (activeClients != 0) {
-	    int meanPerClient = 0;
-	    int stdDevPerClient = 0;
+	    ArrayList<Double> meanPerClient = new ArrayList<Double>();
 	    for (ThroughputLogger logger : clientLoggers) {
-		meanPerClient += logger.getThroughput();
+		meanPerClient.add(logger.getThroughput());
 	    }
-	    serverThroughput /= 5;
-	    meanPerClient /= activeClients;
+	    Double localServerThroughput = serverThroughput/20.0;
+	    reset();
+	    double mean = mean(meanPerClient);
+	    double std = standardDev(meanPerClient);
 	    LocalTime time = LocalTime.now();
 	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m:s");
 	    String timestamp = "[" + time.format(formatter) + "]";
 	
-	    System.out.printf(timestamp + " Server Throughput: %d messages/s, \n", serverThroughput);
+	    System.out.printf(timestamp + " Server Throughput: %f messages/s, \n", localServerThroughput);
 	    System.out.printf("Active Client Connections: %d, \n", activeClients);
-	    System.out.printf("Mean Per-client Throughput: %d messages/s, \n", meanPerClient);
-	    System.out.printf("Std. Dev. of Per-client Throughput: %d messages/s \n\n",
-			      stdDevPerClient);
-
-	    reset();
+	    System.out.printf("Mean Per-client Throughput: %f messages/s, \n", mean);
+	    System.out.printf("Std. Dev. of Per-client Throughput: %f messages/s \n\n", std);
 	}
     }
 }

@@ -2,6 +2,7 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
+import cs455.scaling.util.HashGenerator;
 import cs455.scaling.util.ServerLogger;
 import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.Selector;
@@ -14,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.io.IOException;
 import java.util.Set;
 import java.util.Timer;
+import java.util.Iterator;
 
 public class Server {
 
@@ -21,10 +23,9 @@ public class Server {
     private static ThreadPoolManager tpm;
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
-    private static ServerLogger serverLogger = new ServerLogger();
-    
-    //private final int clientInterestSet = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
-    
+    private static final ServerLogger serverLogger = new ServerLogger();
+    private final HashGenerator hashGen = new HashGenerator();
+       
     public static void main(String[] args) {
 
 	Server s = new Server();
@@ -59,7 +60,7 @@ public class Server {
     private void printStatus() {
 	// log stats to the console every interval
 	Timer timer = new Timer();
-	int interval = 5000;
+	int interval = 20000;
 	timer.schedule(serverLogger, interval, interval);
     }
     
@@ -77,24 +78,31 @@ public class Server {
 	    // Register new sockets
 	    if (socketChannel != null)
 		registerIncomingKey(socketChannel);
-	    // Find read ready channels
-	    if (serverSelector.select(1000) > 0) {
-		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 
-		for (SelectionKey key : selectedKeys) {		    
-		    if (key.isReadable()) {	  
-			// create and enqueue a task to read message from client
-			createTask(key);			
-			tpm.assignTask();
-		    }
-		    selectedKeys.remove(key);
+	    // Find read ready channels	    		
+	    if (serverSelector.selectNow() > 0) {
+		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
+		Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+		
+	        while(keyIterator.hasNext()) {	    
+		    SelectionKey key = keyIterator.next();
+		    keyIterator.remove();    
+		    		    
+		    if (key.interestOps() == SelectionKey.OP_READ) {	  
+			if (key.isReadable()) {
+			    // create and enqueue a task to read message from client
+			    key.interestOps(SelectionKey.OP_WRITE);
+			    createTask(key);			
+			    tpm.assignTask();
+			}
+		    }       	    
 		}		
 	    }
 	}
     }
     
     private void createTask(SelectionKey key) throws IOException {
-	ServerTask task = new ServerTask(key, serverLogger, debug);
+	ServerTask task = new ServerTask(key, serverLogger, hashGen, debug);
 	tpm.addTaskToQueue(task);
     }
     
