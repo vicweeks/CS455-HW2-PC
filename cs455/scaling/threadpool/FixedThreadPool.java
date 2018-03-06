@@ -4,18 +4,23 @@ import java.util.LinkedList;
 
 public class FixedThreadPool {
 
-    private LinkedList<WorkerThread> threadPool;
-    private boolean debug;
+    private final LinkedList<WorkerThread> threadPool;
+    private final boolean debug;
     
     public FixedThreadPool(int threadPoolSize, boolean debug) {
 	this.debug = debug;
 	threadPool = new LinkedList<WorkerThread>();
 	for (int i=0; i<threadPoolSize; i++) {
 	    threadPool.add(new WorkerThread(this, debug));
-	    threadPool.get(i).start();
 	}
     }
 
+    public void initialize() {
+	for (WorkerThread thread : threadPool) {
+	    thread.start();
+	}
+    }
+    
     public WorkerThread retrieveSpareWorker() {
 	// allows a spare worker thread to be retrieved
 	WorkerThread spareThread = null;

@@ -10,22 +10,21 @@ import java.util.LinkedList;
 
 public class ClientTask extends Thread {
 
-    private SocketChannel socketChannel;
-    private ByteBuffer buf;
-    private HashCache hashCache;
+    private final SocketChannel socketChannel;
+    private final ByteBuffer buf = ByteBuffer.allocate(20);
+    private final HashCache hashCache;
     private final HashGenerator hashGen = new HashGenerator();
-    private boolean debug;
+    private final boolean debug;
     
     public ClientTask(SocketChannel socketChannel, HashCache hashCache, boolean debug) {
 	this.socketChannel = socketChannel;
-	buf = ByteBuffer.allocate(20);
         this.hashCache = hashCache;
 	this.debug = debug;
     }
 
     public void run() {
 	try {
-	    Thread.sleep(1000);
+	    Thread.sleep(100);
 	    while(!isInterrupted()) {
 		receiveMessage();		
 	    }
@@ -34,25 +33,22 @@ public class ClientTask extends Thread {
 	}
     }
 
-    private void receiveMessage() {
+    private void receiveMessage() throws InterruptedException {
         try {
 	    int bytesRead = 0;
 
 	    while(buf.hasRemaining() && bytesRead != -1)
 		bytesRead = socketChannel.read(buf);
-
-	    //System.out.println(buf.toString());
 	    
 	    if (bytesRead <= 0) { // nothing has been read
 		if (debug) {
 		    System.out.println("Nothing was read. " + bytesRead);
 		}
+		Thread.sleep(100);
 		return;
 	    } else {
-		byte[] message = new byte[bytesRead];
-		buf.flip();
-		buf.get(message);
-		checkHash(message);
+	        buf.flip();
+		checkHash(buf.array());
 		buf.clear();
 	    }
 	    

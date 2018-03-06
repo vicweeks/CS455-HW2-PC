@@ -5,16 +5,17 @@ import java.util.LinkedList;
 
 public class ThreadPoolManager {
     
-    private int threadPoolSize;
-    private FixedThreadPool threadPool;
-    private LinkedList<Runnable> taskQueue;
-    private boolean debug;
+    private final int threadPoolSize;
+    private final FixedThreadPool threadPool;
+    private final LinkedList<Runnable> taskQueue;
+    private final boolean debug;
     
     public ThreadPoolManager(int threadPoolSize, boolean debug) {
 	this.threadPoolSize = threadPoolSize;
 	this.debug = debug;
 	this.taskQueue = new LinkedList<Runnable>();
 	this.threadPool = new FixedThreadPool(threadPoolSize, debug);
+	threadPool.initialize();
     }
 
     public void addTaskToQueue(Runnable task) {

@@ -4,8 +4,7 @@ import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tasks.ServerTask;
 import cs455.scaling.util.HashGenerator;
 import cs455.scaling.util.ServerLogger;
-//import cs455.scaling.util.ThroughputLogger;
-import cs455.scaling.util.ClientAttachment;
+import cs455.scaling.util.ThroughputLogger;
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -24,8 +23,8 @@ public class Server {
     private static ThreadPoolManager tpm;
     private static ServerSocketChannel ssChannel;
     private static Selector serverSelector;
-    private static ServerLogger serverLogger = new ServerLogger();
-    private HashGenerator hashGen = new HashGenerator();
+    private static final ServerLogger serverLogger = new ServerLogger();
+    private final HashGenerator hashGen = new HashGenerator();
        
     public static void main(String[] args) {
 
@@ -61,7 +60,7 @@ public class Server {
     private void printStatus() {
 	// log stats to the console every interval
 	Timer timer = new Timer();
-	int interval = 5000;
+	int interval = 20000;
 	timer.schedule(serverLogger, interval, interval);
     }
     
@@ -79,9 +78,9 @@ public class Server {
 	    // Register new sockets
 	    if (socketChannel != null)
 		registerIncomingKey(socketChannel);
-	    // Find read ready channels	    
-		
-	    if (serverSelector.select(1000) > 0) {
+
+	    // Find read ready channels	    		
+	    if (serverSelector.selectNow() > 0) {
 		Set<SelectionKey> selectedKeys = serverSelector.selectedKeys();
 		Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 		
@@ -113,9 +112,8 @@ public class Server {
 	try {
 	    socketChannel.configureBlocking(false);
 	    SelectionKey key = socketChannel.register(serverSelector, SelectionKey.OP_READ);
-	    ClientAttachment attachment = new ClientAttachment(serverLogger);
-	    //ThroughputLogger logger = serverLogger.addClient();	    
-	    key.attach(attachment);
+	    ThroughputLogger logger = serverLogger.addClient();	    
+	    key.attach(logger);
 	} catch (ClosedChannelException cce) {
 	    System.out.println(cce.getMessage());
 	}

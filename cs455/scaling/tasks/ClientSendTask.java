@@ -11,19 +11,18 @@ import java.util.LinkedList;
 
 public class ClientSendTask extends Thread {
 
-    private SocketChannel socketChannel;
-    private int messageRate;
-    private HashCache hashCache;
-    private ClientLogger logger;
-    private final HashGenerator hashGen;
-    private boolean debug;
+    private final SocketChannel socketChannel;
+    private final int messageRate;
+    private final HashCache hashCache;
+    private final ClientLogger logger;
+    private final HashGenerator hashGen = new HashGenerator();
+    private final boolean debug;
     
     public ClientSendTask(SocketChannel socketChannel, int messageRate,
 			  ClientLogger logger, HashCache hashCache,  boolean debug) {
 	this.socketChannel = socketChannel;
 	this.messageRate = messageRate;
 	this.hashCache = hashCache;
-	hashGen = new HashGenerator();
 	this.logger = logger;
 	this.debug = debug;
     }
@@ -47,24 +46,14 @@ public class ClientSendTask extends Thread {
 	new Random().nextBytes(rBytes);
 	return rBytes;
     }
-
-    private byte[] genTestBytes(int n) {
-	byte[] testBytes = new byte[n*1024];
-	new Random().nextBytes(testBytes);
-	return testBytes;
-    }
     
     private void sendMessage() throws IOException {
 	byte[] message = generateRandomBytes();
-	//String messageString = "hello world";
-	//byte[] message = messageString.getBytes();
        
-	//byte[] message = genTestBytes(2);
         byte[] hashBytes = hashGen.SHA1FromBytes(message);
 	String messageHash = hashGen.convertToString(hashBytes);
 
-	//System.out.println("Sent Message: " + new String(message));
-	if(debug) {
+	if (debug) {
 	    System.out.println("Sent Hash: " + messageHash);
 	}
 	

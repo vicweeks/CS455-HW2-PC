@@ -66,7 +66,7 @@ public class ServerLogger extends TimerTask {
 	    for (ThroughputLogger logger : clientLoggers) {
 		meanPerClient.add(logger.getThroughput());
 	    }
-	    Double localServerThroughput = serverThroughput/5.0;
+	    Double localServerThroughput = serverThroughput/20.0;
 	    reset();
 	    double mean = mean(meanPerClient);
 	    double std = standardDev(meanPerClient);

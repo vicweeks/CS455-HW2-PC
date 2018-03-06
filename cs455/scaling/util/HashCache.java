@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 public class HashCache {
 
+    // thread safe list implementation
     public class ImprovedList<T> extends LinkedList<T> {
 
 	private final LinkedList<T> list = new LinkedList<T>();
@@ -22,12 +23,14 @@ public class HashCache {
 	}
     }
         
-    private ImprovedList<String> packetHashCodes;
-    private ClientLogger logger;
+    private final ImprovedList<String> packetHashCodes;
+    private final ClientLogger logger;
+    private final Boolean debug;
     
-    public HashCache(ClientLogger logger) {
+    public HashCache(ClientLogger logger, Boolean debug) {
 	packetHashCodes = new ImprovedList<String>();
 	this.logger = logger;
+	this.debug = debug;
     }
 
     public void addHash(String messageHash) {
@@ -35,12 +38,6 @@ public class HashCache {
 	synchronized(packetHashCodes) {
 	    packetHashCodes.notify();
 	}
-	/*
-	synchronized(packetHashCodes) {
-	    packetHashCodes.add(messageHash);
-	    packetHashCodes.notify();
-	}
-	*/
     }
 
     public void checkHash(String messageHash) {
@@ -57,35 +54,11 @@ public class HashCache {
 	    logger.addReceived();
 	    return;
 	} else {
-	    System.out.println("Message Hash Not Found: " + messageHash);
+	    if (debug) {
+		System.out.println("Message Hash Not Found: " + messageHash);
+	    }
 	}
-	
-	/*
-	synchronized(packetHashCodes) {
-	    if ()
-	    
-	    System.out.println(packetHashCodes.size());
-	    int hashIndex = packetHashCodes.indexOf(messageHash);
-	    //System.out.println("hashIndex is: " + hashIndex);
-	    for(int i=0; i<2; i++) {
-		if (hashIndex == -1) {
-		    try {
-			packetHashCodes.wait();
-		    } catch (InterruptedException ie) {
-			System.out.println(ie.getMessage());
-		    }		    
-		}
-	    }
-	    if (hashIndex != -1) { //found hash
-		packetHashCodes.remove(hashIndex);
-		logger.addReceived();
-	    }
-	    else {
-		System.out.println("Could not find hash " + messageHash);
-	    }
-	    
-	}
-	*/
+        
     }
     
 }

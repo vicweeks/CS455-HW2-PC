@@ -5,11 +5,7 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 
 public class HashGenerator {
-    
-    public HashGenerator() {
-        
-    }
-
+   
     public byte[] SHA1FromBytes(byte[] data) {
 	MessageDigest digest = null;
 	try {

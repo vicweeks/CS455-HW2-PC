@@ -12,7 +12,7 @@ import java.util.Timer;
 public class Client {
     
     private static SocketChannel socketChannel;
-    private static ClientLogger clientLogger = new ClientLogger();
+    private static final ClientLogger clientLogger = new ClientLogger();
     
     public static void main(String[] args) {
 
@@ -36,7 +36,7 @@ public class Client {
 	
 	try {
 	    c.setUpChannel(serverHost, serverPort);
-	    HashCache hashCache = new HashCache(clientLogger);
+	    HashCache hashCache = new HashCache(clientLogger, debug);
 	    ClientTask clientTask = new ClientTask(socketChannel, hashCache, debug);
 	    clientTask.start();
 	    ClientSendTask clientSendTask = new ClientSendTask(socketChannel, messageRate, clientLogger, hashCache, debug);
@@ -50,9 +50,9 @@ public class Client {
     }
 
     private void printStatus() {
-	// logs stats to the console evry interval
+	// logs stats to the console every interval
 	Timer timer = new Timer();
-	int interval = 5000;
+	int interval = 20000;
 	timer.schedule(clientLogger, interval, interval);
     }
     
